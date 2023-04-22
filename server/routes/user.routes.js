@@ -1,13 +1,19 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../database/connection');
-const authentication = require('../authentication/authentication');
+const dbp = require('../database/pool_connection');
+const dbs = require('../database/standard_connection');
+const standard_authentication = require('../authentication/standard_authentication');
+const pool_authentication = require('../authentication/pool_authentication');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const validator = require('validator');
 const createError = require('http-errors');
 const async = require('async');
 require("dotenv").config();
+
+router.get('/check-auth', standard_authentication, (req, res, next) => {
+  res.send("Authorised Successfully");
+})
 
 router.route('/register').post((req, res) => {
   let {userEmail, userPassword, userPassword2, userFname, userLname} = req.body;
@@ -28,7 +34,7 @@ router.route('/register').post((req, res) => {
       message: "Passwords do not match"
     });
   }
-  db.query("Select * FROM users WHERE user_email = '"+userEmail+"';", (error, result) => {
+  dbs.query("Select * FROM users WHERE user_email = '"+userEmail+"';", (error, result) => {
     if(error){
       return res.status(400).send({
         message: error
@@ -43,7 +49,7 @@ router.route('/register').post((req, res) => {
       user.user_password=hash;
     }).then(() => {
       console.log(user);
-      db.query("INSERT INTO users SET ?;",user, (error, result) => {
+      dbs.query("INSERT INTO users SET ?;",user, (error, result) => {
         if(error){
           return res.status(400).send({
             message: error
@@ -55,12 +61,12 @@ router.route('/register').post((req, res) => {
   });
 });
 
-router.get('/ongoing', authentication, (req, res, next) => {
+router.get('/ongoing', standard_authentication, (req, res, next) => {
   res.send("Yes it is working");
 });
 
-router.get('/create-schedule', authentication, (req, res, next) => {
-  db.query("SELECT * from projects", (error, result) => {
+router.get('/create-schedule', standard_authentication, (req, res, next) => {
+  dbs.query("SELECT * from projects", (error, result) => {
     if(error){
       return res.status(400).send({
         message: error
@@ -70,7 +76,35 @@ router.get('/create-schedule', authentication, (req, res, next) => {
   })
 })
 
-router.get('/schedule', authentication, (req, res, next) => {
+router.route('/create-schedule2', standard_authentication).post((req, res, next) => {
+  let {employeeID, scheduleDate, projectID} = req.body;
+  const sced = {user_id: employeeID, dt: scheduleDate, project_id: projectID};
+  try{
+    dbs.query("INSERT INTO schedule_event SET ?", sced, (error, result) => {
+      if(error){
+        return res.status(400).send({
+          message: error
+        });
+      }
+      //return res.status(201).send({ message: "Schedule Event Created Successfuly"})
+    })
+    dbs.query("SELECT * from projects", (error, result) => {
+      if(error){
+        return res.status(400).send({
+          message: error
+        });
+      }
+      return res.status(200).send({ data: result });
+    })
+  }
+  catch(error){
+    return res.status(500).send({
+      message: "Server Error"
+    });
+  }
+})
+
+router.get('/schedule', pool_authentication, (req, res, next) => {
   var currDate = new Date().toISOString().slice(0,10);
   console.log(currDate);
   let weekAdder = parseInt(req.query.weekAdder);
@@ -89,12 +123,12 @@ router.get('/schedule', authentication, (req, res, next) => {
 
   queryPromise1 = () => {
     return new Promise((resolve, reject) => {
-      db.query("SELECT w, y FROM calendar_table WHERE dt = ?", currDate, (error, result) => {
+      dbp.query("SELECT w, y FROM calendar_table WHERE dt = ?", currDate, (error, result) => {
         if(error){
           return reject(error);
         }
         useYear = parseInt(result[0].y);
-        picker = parseInt(result[0].w)+weekAdder;
+        picker = parseInt(result[0].w)+parseInt(weekAdder);
         if(picker>52){
           useYear++;
           picker = picker-52;
@@ -106,12 +140,31 @@ router.get('/schedule', authentication, (req, res, next) => {
   }
   queryPromise2 = () => {
     return new Promise((resolve, reject) => {
-      db.query("SELECT * from calendar_table WHERE y = ? AND w = ?", [useYear, picker], (error, result) => {
+      dbp.query("SELECT * from calendar_table WHERE y = ? AND w = ?", [useYear, picker], (error, result) => {
         if(error){
           return reject(error);
         }
         for(let i=0; i<result.length; i++){
-          datesHold.push(result[i].dt.toISOString().slice(0,8)+((parseInt(result[i].dt.toISOString().slice(8,10)))+1).toString());
+          let useg = "";
+          var makeD = result[i].d;
+          var makeM = result[i].m;
+          var makeY = result[i].y;
+          useg+=makeY+"-";
+          if(makeM<10){
+            useg+="0"+makeM;
+          }
+          else{
+            useg+=makeM;
+          }
+          useg+="-";
+          if(makeD<10){
+            useg+="0"+makeD;
+          }
+          else{
+            useg+=makeD;
+          }
+          console.log(useg);
+          datesHold.push(useg);
         }
         console.log(datesHold);
         return resolve();
@@ -120,7 +173,7 @@ router.get('/schedule', authentication, (req, res, next) => {
   }
   queryPromise3 = () => {
     return new Promise((resolve, reject) => {
-      db.query("SELECT * from users WHERE is_admin = 0", (error, result) => {
+      dbp.query("SELECT * from users WHERE is_admin = 0", (error, result) => {
         if(error){
           return reject(error);
         }
@@ -136,8 +189,9 @@ router.get('/schedule', authentication, (req, res, next) => {
     return new Promise((resolve, reject) => {
       for(let i=0; i<employeeHold.length; i++){
         employeeHold[i].goer.push(employeeHold[i].firstName+" "+employeeHold[i].lastName);
+        employeeHold[i].goer.push(employeeHold[i].id);
         for(let j=0; j<datesHold.length; j++){
-          db.query("SELECT project_name from schedule_event INNER JOIN projects ON schedule_event.project_id = projects.project_id AND user_id = ? AND dt = ?", [employeeHold[i].id, datesHold[j]], (error, result) => {
+          dbp.query("SELECT project_name from schedule_event INNER JOIN projects ON schedule_event.project_id = projects.project_id AND user_id = ? AND dt = ?", [employeeHold[i].id, datesHold[j]], (error, result) => {
             if(error){
               return reject(error);
             }
@@ -202,11 +256,11 @@ router.get('/schedule', authentication, (req, res, next) => {
   querySequence();
 });
 
-router.route('/create-project', authentication).post((req, res, next) => {
+router.post('/create-project', standard_authentication, (req, res, next) => {
   let {projectName, projectLocation, contactName, contactNumber, projectDeadline} = req.body;
   const proj = {project_name: projectName, project_location: projectLocation, contact_name: contactName, contact_number: contactNumber, project_deadline: projectDeadline};
   try{
-    db.query("INSERT INTO projects SET ?", proj, (error, result) => {
+    dbs.query("INSERT INTO projects SET ?", proj, (error, result) => {
       if(error){
         return res.status(400).send({
           message: error
@@ -224,11 +278,10 @@ router.route('/create-project', authentication).post((req, res, next) => {
 
 router.route('/login').post((req, res) => {
   const {userEmail, userPassword} = req.body;
-  console.log(userEmail);
   if(req.body.userEmail.trim()==="" || req.body.userPassword.trim()===""){
     return res.status(400).send({ message: "Required fields remain empty"});
   }
-  db.query("SELECT * FROM users WHERE user_email = '"+userEmail+"';", (error, result) => {
+  dbs.query("SELECT * FROM users WHERE user_email = '"+userEmail+"';", (error, result) => {
     if(error){
       return res.status(400).send({
         message: error

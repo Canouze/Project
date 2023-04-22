@@ -8,6 +8,8 @@ import Ongoing from './components/ongoing.component'
 import Schedule from './components/schedule.component'
 import CreateProject from './components/create-project.component'
 import CreateSchedule from './components/create-schedule.component'
+import withRouter from './components/withRouter.component'
+import AdminDashboard from './components/admin-dashboard.component'
 const createError = require('http-errors');
 function App() {
   return (
@@ -16,10 +18,7 @@ function App() {
         <header>
           <nav className="navbar navbar-expand-lg navbar-dark bg-primary">
             <a className="navbar-brand">SmartSchedule</a>
-            <div
-              className="collapse navbar-collapse"
-              id="navbarSupportedContent"
-            >
+            <div className="collapse navbar-collapse" id="navbarSupportedContent">
               <ul className="navbar-nav ml-auto">
                 <li className="nav-item active">
                   <Link className="nav-link" to={'/register'}>Home</Link>
@@ -51,6 +50,7 @@ function App() {
                 <Route path="/schedule" element={<Schedule />} />
                 <Route path="/create-project" element={<CreateProject />} />
                 <Route path="/create-schedule" element={<CreateSchedule />} />
+                <Route path="/admin-dashboard" element={<AdminDashboard />} />
               </Routes>
             </div>
           </div>

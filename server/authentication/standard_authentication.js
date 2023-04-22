@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const db = require("../database/connection.js");
+const db = require("../database/standard_connection.js");
 const createError = require('http-errors');
 
 const authentication = async(req, res, next) => {

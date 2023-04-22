@@ -14,6 +14,15 @@ export default class CreateProject extends Component {
     this.onSubmit = this.onSubmit.bind(this);
     this.state = {projectName: '', projectLocation: '', contactName: '', contactNumber: '', projectDeadline: ''};
   }
+  componentDidMount(){
+    axios.get("/check-auth", { headers: {"Authorisation" : `Bearer ${Cookies.get('token')}`} })
+      .then(res => {
+        console.log(res);
+      })
+      .catch(function (error) {
+        console.log(error);
+      })
+  }
   onChangeProjectName(change){
     this.setState({ projectName: change.target.value })
   }
