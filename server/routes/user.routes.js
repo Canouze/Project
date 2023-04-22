@@ -6,6 +6,7 @@ const standard_authentication = require('../authentication/standard_authenticati
 const pool_authentication = require('../authentication/pool_authentication');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const ShortUniqueID = require('short-unique-id');
 const validator = require('validator');
 const createError = require('http-errors');
 const async = require('async');
@@ -16,9 +17,9 @@ router.get('/check-auth', standard_authentication, (req, res, next) => {
 })
 
 router.route('/register').post((req, res) => {
-  let {userEmail, userPassword, userPassword2, userFname, userLname} = req.body;
-  const user = {user_email: userEmail, user_fname: userFname, user_lname: userLname};
-  console.log(user);
+  let {userEmail, userPassword, userPassword2, userFname, userLname, isAdmin, teamKey, teamName} = req.body;
+  const user = {user_email: userEmail, user_fname: userFname, user_lname: userLname, is_admin: isAdmin};
+  const team = {};
   if(!userEmail || !validator.isEmail(userEmail)){
     return res.status(400).send({
       message: "Please enter a valid email"
@@ -47,16 +48,87 @@ router.route('/register').post((req, res) => {
     }
     bcrypt.hash(userPassword, 8).then((hash) => {
       user.user_password=hash;
-    }).then(() => {
-      console.log(user);
-      dbs.query("INSERT INTO users SET ?;",user, (error, result) => {
-        if(error){
-          return res.status(400).send({
-            message: error
-          });
+      if(isAdmin===true){
+        team.team_name=teamName;
+        const uid = new ShortUniqueID({length: 8});
+        const unique_key=uid();
+        team.team_key=unique_key;
+        user.team_key=unique_key;
+        queryPromise1 = () => {
+          return new Promise((resolve, reject) => {
+            dbp.query("INSERT INTO teams SET ?;",team, (error, result) => {
+              if(error){
+                return reject(error);
+              }
+              return resolve();
+            })
+          })
         }
-        return res.status(201).send({ message: "Registration Successful"})
-      });
+        queryPromise2 = () => {
+          return new Promise((resolve, reject) => {
+            dbp.query("INSERT INTO users SET ?;",user, (error, result) => {
+              if(error){
+                return reject(error);
+              }
+              return resolve();
+            })
+          })
+        }
+        async function querySequence(){
+          try{
+            await queryPromise1();
+            await queryPromise2();
+          }
+          catch(error){
+            console.log(error);
+            return res.status(500).send({
+              message: "Server Error"
+            });
+          }
+        }
+        querySequence();
+      }
+      else{
+        user.team_key=teamKey;
+        queryPromise1 = () => {
+          return new Promise((resolve, reject) => {
+            dbp.query("SELECT * FROM teams WHERE team_key=?",user.team_key, (error, result) => {
+              if(error){
+                return reject(error);
+              }
+              if(result.length===0){
+                return reject(new Error("No matching team exists for the given key"));
+              }
+              else{
+                return resolve();
+              }
+            })
+          })
+        }
+        queryPromise2 = () => {
+          return new Promise((resolve, reject) => {
+            dbp.query("INSERT INTO users SET ?;",user, (error, result) => {
+              if(error){
+                return reject(error);
+              }
+              return resolve();
+            })
+          })
+        }
+        async function querySequence(){
+          try{
+            await queryPromise1();
+            await queryPromise2();
+            res.send("Registration Successful")
+          }
+          catch(error){
+            return res.status(500).send({
+              message: error.message
+            });
+          }
+        }
+        querySequence();
+      }
     });
   });
 });
@@ -292,10 +364,7 @@ router.route('/login').post((req, res) => {
         message: "There is no registered user with this email address"
       });
     }
-    console.log(userPassword);
-    console.log(result[0].user_password);
     bcrypt.compare(userPassword, result[0].user_password).then(isMatch => {
-      console.log(isMatch);
       if(isMatch===false){
         return res.status(401).send({
           message: "Incorrect Password"
