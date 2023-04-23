@@ -10,6 +10,7 @@ import CreateProject from './components/create-project.component'
 import CreateSchedule from './components/create-schedule.component'
 import withRouter from './components/withRouter.component'
 import AdminDashboard from './components/admin-dashboard.component'
+import ViewProjects from './components/view-projects.component'
 const createError = require('http-errors');
 function App() {
   return (
@@ -51,6 +52,7 @@ function App() {
                 <Route path="/create-project" element={<CreateProject />} />
                 <Route path="/create-schedule" element={<CreateSchedule />} />
                 <Route path="/admin-dashboard" element={<AdminDashboard />} />
+                <Route path="/view-projects" element={<ViewProjects />} />
               </Routes>
             </div>
           </div>

@@ -1,57 +1,59 @@
 // ** register.component.js ** //
-import React, { Component } from 'react';
+import React, { useState } from 'react';
+import {useNavigate} from 'react-router-dom';
 import axios from 'axios';
-export default class Register extends Component {
-  constructor(props){
-    super(props)
-    this.onChangeEmail = this.onChangeEmail.bind(this);
-    this.onChangePassword = this.onChangePassword.bind(this);
-    this.onChangePassword2 = this.onChangePassword2.bind(this);
-    this.onChangeFname = this.onChangeFname.bind(this);
-    this.onChangeLname = this.onChangeLname.bind(this);
-    this.onChangeUserType = this.onChangeUserType.bind(this);
-    this.onChangeTeamKey = this.onChangeTeamKey.bind(this);
-    this.onChangeTeamName = this.onChangeTeamName.bind(this);
-    this.onSubmit = this.onSubmit.bind(this);
-    this.state = {email: '', password: '', password2: '', fname: '', lname: '', isAdmin: false, teamKey: '', teamName: ''};
+function Register(){
+  let navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [password2, setPassword2] = useState("");
+  const [fname, setFName] = useState("");
+  const [lname, setLName] = useState("");
+  const [isAdmin, setIsAdmin] = useState("");
+  const [teamKey, setTeamKey] = useState("");
+  const [teamName, setTeamName] = useState("");
+  const handleEmailChange = e => {
+    setEmail(e.target.value);
   }
-  onChangeEmail(change){
-    this.setState({ userEmail: change.target.value })
+  const handlePasswordChange = e => {
+    setPassword(e.target.value);
   }
-  onChangePassword(change){
-    this.setState({ userPassword: change.target.value })
+  const handlePassword2Change = e => {
+    setPassword2(e.target.value);
   }
-  onChangeFname(change){
-    this.setState({ userFname: change.target.value })
+  const handleFNameChange = e => {
+    setFName(e.target.value);
   }
-  onChangeLname(change){
-    this.setState({ userLname: change.target.value })
+  const handleLNameChange = e => {
+    setLName(e.target.value);
   }
-  onChangePassword2(change){
-    this.setState({ userPassword2: change.target.value })
+  const handleIsAdminChange = e => {
+    setIsAdmin(e.target.value);
   }
-  onChangeTeamKey(change){
-    this.setState({ teamKey: change.target.value})
+  const handleTeamKeyChange = e => {
+    setTeamKey(e.target.value);
   }
-  onChangeTeamName(change){
-    this.setState({ teamName: change.target.value})
+  const handleTeamNameChange = e => {
+    setTeamName(e.target.value);
   }
-  onChangeUserType(change){
-    if(change.target.value==="standard_user"){
-      this.setState({ isAdmin: false})
+
+  const handleUserTypeChange = e => {
+    if(e.target.value==="standard_user"){
+      setIsAdmin(false);
     }
     else{
-      this.setState({ isAdmin: true })
+      setIsAdmin(true);
     }
   }
-  additionalContent(){
-    if(this.state.isAdmin===false){
+
+  const additionalContent = e => {
+    if(isAdmin===false){
       return(
         <>
         <label htmlFor="teamKey">Unique Team Key (provided by your Administrator):</label>
         <br/>
         <br/>
-        <input type="text" placeholder="" id="teamKey" value={this.state.teamKey} onChange={this.onChangeTeamKey} required/>
+        <input type="text" placeholder="" id="teamKey" value={teamKey} onChange={handleTeamKeyChange} required/>
         <br/>
         <br/>
         </>
@@ -63,84 +65,83 @@ export default class Register extends Component {
         <label htmlFor="teamName">Enter a name for your new Team:</label>
         <br/>
         <br/>
-        <input type="text" placeholder="" id="teamName" value={this.state.teamName} onChange={this.onChangeTeamName} required/>
+        <input type="text" placeholder="" id="teamName" value={teamName} onChange={handleTeamNameChange} required/>
         <br/>
         <br/>
         </>
       )
     }
   }
-  onSubmit(change){
-    change.preventDefault();
+
+  const handleSubmit = e => {
+    e.preventDefault();
     const userObj = {
-      userEmail: this.state.userEmail,
-      userPassword: this.state.userPassword,
-      userPassword2: this.state.userPassword2,
-      userFname: this.state.userFname,
-      userLname: this.state.userLname,
-      isAdmin: this.state.isAdmin,
-      teamKey: this.state.teamKey,
-      teamName: this.state.teamName
+      userEmail: email,
+      userPassword: password,
+      userPassword2: password2,
+      userFname: fname,
+      userLname: lname,
+      isAdmin: isAdmin,
+      teamKey: teamKey,
+      teamName: teamName
     };
     axios.post('http://localhost:4000/users/register', userObj)
       .then((res) => {
       }).catch((error) => {
           alert(error.response.data.message);
       });
-    this.setState({ userEmail: '', userPassword: '', userPassword2: '', userFname: '', userLname: '', userType: '' });
-    console.log(this.props);
-    this.props.navigation.navigate('/login')
+    navigate('/login');
   }
-  render(){
-    return(
-      <div className = "wrapper">
-        <form onSubmit={this.onSubmit} style={{marginLeft: "5em", marginTop: "2em", marginBottom: "10em", display: "flex"}}>
-          <div class="col-md-6" style={{marginTop: "5em"}}>
-            <h2>Register</h2>
-            <p>We need some details...</p>
-            <label htmlFor="register_email"><b>Email:</b></label>
-            <br/>
-            <input type="email" placeholder="" id="register_email" value={this.state.userEmail} onChange={this.onChangeEmail} required/>
-            <br/>
-            <br/>
-            <label htmlFor="register_password"><b>Password:</b></label>
-            <br/>
-            <input type="password" placeholder="" id="register_password" value={this.state.userPassword} onChange={this.onChangePassword} required/>
-            <br/>
-            <br/>
-            <label htmlFor="register_password2"><b>Repeat Password:</b></label>
-            <br/>
-            <input type="password" placeholder="" id="register_password2" value={this.state.userPassword2} onChange={this.onChangePassword2} required/>
-            <br/>
-            <br/>
-            <label htmlFor="register_fname"><b>First Name:</b></label>
-            <br/>
-            <input type="text" placeholder="" id="register_fname" value={this.state.userFname} onChange={this.onChangeFname} required/>
-            <br/>
-            <br/>
-            <label htmlFor="register_lname"><b>First Name:</b></label>
-            <br/>
-            <input type="text" placeholder="" id="register_lname" value={this.state.userLname} onChange={this.onChangeLname} required/>
-            <br/>
-            <br/>
-          </div>
-          <div class="col-md-6" style={{marginTop: "8em", paddingRight: "10em"}}>
-            <p>Do you want to join an existing team or register as an admin and create a new team?</p>
-            <br/>
-            <label htmlFor="notAdmin"><b>Standard User - Join an Existing Team</b></label>
-            <br/>
-            <input type="radio" id="notAdmin" name="userType" value="standard_user" onChange={this.onChangeUserType}/>
-            <br/>
-            <label htmlFor="admin"><b>Admin User - Create a new Team</b></label>
-            <br/>
-            <input type="radio" id="admin" name="userType" value="admin_user" onChange={this.onChangeUserType}/>
-            <br/>
-            <br/>
-            {this.additionalContent()}
-            <button type="submit" className="register">Register</button>
-          </div>
-        </form>
-      </div>
-    )
-  }
+  return(
+    <div className = "wrapper">
+      <form onSubmit={handleSubmit} style={{marginLeft: "5em", marginTop: "2em", marginBottom: "10em", display: "flex"}}>
+        <div class="col-md-6" style={{marginTop: "5em"}}>
+          <h2>Register</h2>
+          <p>We need some details...</p>
+          <label htmlFor="register_email"><b>Email:</b></label>
+          <br/>
+          <input type="email" placeholder="" id="register_email" value={email} onChange={handleEmailChange} required/>
+          <br/>
+          <br/>
+          <label htmlFor="register_password"><b>Password:</b></label>
+          <br/>
+          <input type="password" placeholder="" id="register_password" value={password} onChange={handlePasswordChange} required/>
+          <br/>
+          <br/>
+          <label htmlFor="register_password2"><b>Repeat Password:</b></label>
+          <br/>
+          <input type="password" placeholder="" id="register_password2" value={password2} onChange={handlePassword2Change} required/>
+          <br/>
+          <br/>
+          <label htmlFor="register_fname"><b>First Name:</b></label>
+          <br/>
+          <input type="text" placeholder="" id="register_fname" value={fname} onChange={handleFNameChange} required/>
+          <br/>
+          <br/>
+          <label htmlFor="register_lname"><b>Last Name:</b></label>
+          <br/>
+          <input type="text" placeholder="" id="register_lname" value={lname} onChange={handleLNameChange} required/>
+          <br/>
+          <br/>
+        </div>
+        <div class="col-md-6" style={{marginTop: "8em", paddingRight: "10em"}}>
+          <p>Do you want to join an existing team or register as an admin and create a new team?</p>
+          <br/>
+          <label htmlFor="notAdmin"><b>Standard User - Join an Existing Team</b></label>
+          <br/>
+          <input type="radio" id="notAdmin" name="userType" value="standard_user" onChange={handleUserTypeChange}/>
+          <br/>
+          <label htmlFor="admin"><b>Admin User - Create a new Team</b></label>
+          <br/>
+          <input type="radio" id="admin" name="userType" value="admin_user" onChange={handleUserTypeChange}/>
+          <br/>
+          <br/>
+          {additionalContent()}
+          <button type="submit" className="register">Register</button>
+        </div>
+      </form>
+    </div>
+  )
 }
+
+export default Register;

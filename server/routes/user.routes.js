@@ -133,6 +133,28 @@ router.route('/register').post((req, res) => {
   });
 });
 
+router.get('/view-projects', standard_authentication, (req, res, next) => {
+  dbs.query("SELECT * FROM projects", (error, result) => {
+    if(error){
+      return res.status(400).send({
+        message: error
+      });
+    }
+    let totalProjects = result.length;
+    let tempDisplay = [];
+    var days = parseInt(req.query.days);
+    var currDate = new Date();
+    for(let i=0; i<result.length; i++){
+      var projectDate = new Date(result[i].project_deadline);
+      var projectDuration = (projectDate.getTime()-currDate.getTime())/86400000;
+      if(days>=projectDuration){
+        tempDisplay.push(result[i]);
+      }
+    }
+    let filteredOut = totalProjects-tempDisplay.length;
+    res.send({displayProjects: tempDisplay, filteredOut: filteredOut});
+  })
+})
 router.get('/ongoing', standard_authentication, (req, res, next) => {
   res.send("Yes it is working");
 });
@@ -178,7 +200,6 @@ router.route('/create-schedule2', standard_authentication).post((req, res, next)
 
 router.get('/schedule', pool_authentication, (req, res, next) => {
   var currDate = new Date().toISOString().slice(0,10);
-  console.log(currDate);
   let weekAdder = parseInt(req.query.weekAdder);
   let teamGet = parseInt(req.query.teamGet);
   function employee(id, first, last) {
@@ -288,6 +309,7 @@ router.get('/schedule', pool_authentication, (req, res, next) => {
       for(let i=0; i<employeeHold.length; i++){
         tempArray.push(employeeHold[i].goer);
       }
+      console.log(tempArray);
       res.status(200).send({
         scheduleArray: tempArray,
         dates: datesHold
