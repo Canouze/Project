@@ -4,8 +4,9 @@ import {useNavigate} from 'react-router-dom';
 import axios from 'axios';
 import Cookies from "js-cookie";
 import { Link } from 'react-router-dom';
-function Login(){
+function Login(props){
   let navigate = useNavigate();
+  const stateChanger = props.stateChanger;
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const handleEmailChange = e => {
@@ -22,11 +23,20 @@ function Login(){
     }
     axios.post('http://localhost:4000/users/login', userObj)
       .then((res) => {
+        console.log(res.data.token);
         Cookies.set("token", res.data.token);
+        console.log(res.data.user.isAdmin);
+        if(res.data.user.isAdmin===1){
+          navigate('/admin-dashboard');
+          window.location.reload();
+        }
+        else{
+          navigate('/user-dashboard');
+          window.location.reload();
+        }
       }).catch((error) => {
         console.log(error)
       });
-    navigate('/admin-dashboard');
   }
   return (
     <div className = "wrapper">

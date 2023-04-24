@@ -3,8 +3,14 @@ import {Link} from 'react-router-dom';
 
 function UserDashboard(){
 
+  const [uniKey, setUniKey] = useState('placeholder');
+  const alertUniKey = () => {
+    alert("Hello");
+  }
+
   return(
     <div>
+    <h1>User Dashboard</h1>
       <Link to="/user-admin">
         <h4>Employees</h4>
       </Link>
@@ -21,4 +27,4 @@ function UserDashboard(){
   )
 }
 
-export default AdminDashboard;
+export default UserDashboard;

@@ -8,6 +8,7 @@ function AdminDashboard(){
   }
   return(
     <div>
+      <h1>Admin Dashboard</h1>
       <Link to="/employee-admin">
         <h4>Employees</h4>
       </Link>

@@ -6,7 +6,7 @@ import Cookies from "js-cookie";
 import withRouter from './withRouter.component'
 function Schedule(){
   let navigate = useNavigate();
-  const [display, setDisplay] = useState(["blank", "blank", "blank", "blank", "blank", "blank", "blank", "blank"]);
+  const [display, setDisplay] = useState([["", "", "", "", "", "", "", ""]]);
   const [weekAdder, setWeekAdder] = useState(0);
   const [teamGet, setTeamGet] = useState(1);
   const [dates, setDates] = useState(["", "", "", "", "", "", ""])
@@ -17,7 +17,10 @@ function Schedule(){
         setDates(res.data.dates);
       })
       .catch(function (error) {
-        console.log(error);
+        if(error.response.data.error==="Please login"){
+          navigate('/login');
+        }
+        console.log("Server Error");
       })
   }, [])
 
@@ -96,12 +99,12 @@ function Schedule(){
                   <td>
                     <Link to='/create-schedule'
                       state={{employee: d[0], id: d[1], date: dates[5]}}
-                    >{d[6]}</Link>
+                    >{d[7]}</Link>
                   </td>
                   <td>
                     <Link to='/create-schedule'
                       state={{employee: d[0], id: d[1], date: dates[6]}}
-                    >{d[8]}</Link>
+                    >{d[7]}</Link>
                   </td>
                 </tr>
               )

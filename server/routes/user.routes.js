@@ -13,7 +13,6 @@ const async = require('async');
 require("dotenv").config();
 
 router.get('/check-auth', standard_authentication, (req, res, next) => {
-  res.send("Authorised Successfully");
 })
 
 router.route('/register').post((req, res) => {
@@ -226,7 +225,6 @@ router.get('/schedule', pool_authentication, (req, res, next) => {
           useYear++;
           picker = picker-52;
         }
-        console.log(picker);
         return resolve();
       })
     })
@@ -256,10 +254,8 @@ router.get('/schedule', pool_authentication, (req, res, next) => {
           else{
             useg+=makeD;
           }
-          console.log(useg);
           datesHold.push(useg);
         }
-        console.log(datesHold);
         return resolve();
       })
     })
@@ -309,7 +305,6 @@ router.get('/schedule', pool_authentication, (req, res, next) => {
       for(let i=0; i<employeeHold.length; i++){
         tempArray.push(employeeHold[i].goer);
       }
-      console.log(tempArray);
       res.status(200).send({
         scheduleArray: tempArray,
         dates: datesHold
@@ -396,7 +391,7 @@ router.route('/login').post((req, res) => {
       res.cookie('token', token, { httpOnly: true, sameSite: 'none', secure: true });
       res.status(200).send({
         message: "Login Successful",
-        user: result[0],
+        user: {userID: result[0].user_id, isAdmin: parseInt(result[0].is_admin)},
         token
       })
     });
