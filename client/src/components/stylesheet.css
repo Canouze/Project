@@ -1,0 +1,25 @@
+tr, th, td {
+  text-align: center;
+  border: 1px
+}
+
+table, td, th {
+  border: 1px solid #ddd;
+}
+
+tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+td{
+  width: 150px;
+}
+
+tr{
+  height: 100px;
+}
+
+a{
+  color: inherit;
+  text-decoration: none
+}

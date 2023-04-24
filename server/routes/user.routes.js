@@ -4,6 +4,7 @@ const dbp = require('../database/pool_connection');
 const dbs = require('../database/standard_connection');
 const standard_authentication = require('../authentication/standard_authentication');
 const pool_authentication = require('../authentication/pool_authentication');
+const check_authentication = require('../authentication/check_authentication');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const ShortUniqueID = require('short-unique-id');
@@ -12,7 +13,8 @@ const createError = require('http-errors');
 const async = require('async');
 require("dotenv").config();
 
-router.get('/check-auth', standard_authentication, (req, res, next) => {
+router.get('/check-auth', check_authentication, (req, res, next) => {
+
 })
 
 router.route('/register').post((req, res) => {
@@ -132,7 +134,8 @@ router.route('/register').post((req, res) => {
   });
 });
 
-router.get('/view-projects', standard_authentication, (req, res, next) => {
+router.get('/view-projects', (req, res, next) => {
+  const check = internal_authentication;
   dbs.query("SELECT * FROM projects", (error, result) => {
     if(error){
       return res.status(400).send({
@@ -389,6 +392,7 @@ router.route('/login').post((req, res) => {
       }
       const token = jwt.sign({ id: result[0].user_id.toString() }, process.env.SECRET_KEY)
       res.cookie('token', token, { httpOnly: true, sameSite: 'none', secure: true });
+      console.log(parseInt(result[0].is_admin));
       res.status(200).send({
         message: "Login Successful",
         user: {userID: result[0].user_id, isAdmin: parseInt(result[0].is_admin)},

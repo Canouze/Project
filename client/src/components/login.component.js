@@ -4,11 +4,11 @@ import {useNavigate} from 'react-router-dom';
 import axios from 'axios';
 import Cookies from "js-cookie";
 import { Link } from 'react-router-dom';
-function Login(props){
+function Login(){
   let navigate = useNavigate();
-  const stateChanger = props.stateChanger;
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isAdmin, setIsAdmin] = useState('');
   const handleEmailChange = e => {
     setEmail(e.target.value);
   }
@@ -23,9 +23,7 @@ function Login(props){
     }
     axios.post('http://localhost:4000/users/login', userObj)
       .then((res) => {
-        console.log(res.data.token);
         Cookies.set("token", res.data.token);
-        console.log(res.data.user.isAdmin);
         if(res.data.user.isAdmin===1){
           navigate('/admin-dashboard');
           window.location.reload();

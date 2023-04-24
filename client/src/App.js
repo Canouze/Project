@@ -16,33 +16,25 @@ import Schedule from './components/schedule.component'
 import CreateProject from './components/create-project.component'
 import CreateSchedule from './components/create-schedule.component'
 import withRouter from './components/withRouter.component'
+import ViewProjects from './components/view-projects.component'
 import AdminDashboard from './components/admin-dashboard.component'
 import UserDashboard from './components/user-dashboard.component'
-import ViewProjects from './components/view-projects.component'
 import Logout from './components/logout.component'
+
 const createError = require('http-errors');
 function App() {
+  const [userObj, setUserObj] = useState('');
   const [loggedIn, setLoggedIn] = useState('');
-  const [userID, setUserID] = useState('');
-  const [userName, setUserName] = useState('');
-  const [isAdmin, setIsAdmin] = useState('');
-  const [menuOptions, setMenuOptions] = useState('');
-  const [state, setState] = useState('');
   useEffect(() => {
     axios.get("/check-auth", {withCredentials: true, headers: {"Authorisation": `Bearer ${Cookies.get('token')}`} })
     .then(res => {
+      setUserObj(res.data);
       setLoggedIn(true);
-      setUserID(res.data.userID);
-      setUserName("Hello "+res.data.userName);
-      setIsAdmin(res.data.isAdmin);
     })
     .catch(function (error) {
       setLoggedIn(false);
-      setUserID("Blank");
-      setUserName("");
-      setIsAdmin("Blank");
     })
-  })
+  }, [])
   const handleMenu = e => {
     if(loggedIn===true){
       return(
@@ -70,7 +62,7 @@ function App() {
                 SmartSchedule
               </Navbar.Brand>
               <Nav.Item className="ms-auto">
-                <Nav.Link as={Link} to="/user-list" style={{height: "auto", marginLeft: "2em"}}>{userName}</Nav.Link>
+                <Nav.Link as={Link} to="/user-list" style={{height: "auto", marginLeft: "2em"}}>{userObj.userName}</Nav.Link>
               </Nav.Item>
               <Nav.Item>
                 <img src="user_icon.png" width="40" style={{height: "auto"}} alt="Main Icon"/>
@@ -92,16 +84,16 @@ function App() {
           <div className="row">
             <div className="col-md-12">
               <Routes>
-                <Route exact path="/" element={<Login stateChanger={setState}/>} />
-                <Route path="/login" element={<Login stateChanger={setState}/>} />
+                <Route exact path="/" element={<Login />} />
+                <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/ongoing" element={<Ongoing />} />
                 <Route path="/schedule" element={<Schedule />} />
                 <Route path="/create-project" element={<CreateProject />} />
                 <Route path="/create-schedule" element={<CreateSchedule />} />
-                <Route path="/admin-dashboard" element={<AdminDashboard />} />
                 <Route path="/user-dashboard" element={<UserDashboard />} />
-                <Route path="/view-projects" element={<ViewProjects />} />
+                <Route path="/admin-dashboard" element={<AdminDashboard />} />
+                <Route path="view-projects" element={<ViewProjects />} />
                 <Route path="/logout" element={<Logout />} />
               </Routes>
             </div>

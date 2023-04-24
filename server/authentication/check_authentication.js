@@ -7,14 +7,14 @@ const authentication = async(req, res, next) => {
     const idToken = req.header('Authorisation').replace('Bearer ', '');
     const decoded = jwt.verify(idToken, process.env.SECRET_KEY);
     req.id = decoded.id;
-    /*dbs.query("SELECT * FROM users WHERE user_id = ?", decoded.id, (error, result) => {
+    dbs.query("SELECT * FROM users WHERE user_id = ?", decoded.id, (error, result) => {
       if(error){
         return res.status(400).send({
           message: error
         });
       }
       return res.send({userID: result[0].user_id, userName: result[0].user_fname+" "+result[0].user_lname, isAdmin: result[0].is_admin})
-    });*/
+    });
     return next();
   }
   catch(error){
