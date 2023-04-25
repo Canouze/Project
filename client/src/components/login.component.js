@@ -38,7 +38,8 @@ function Login(){
   }
   return (
     <div className = "wrapper">
-      <form onSubmit={handleSubmit} style={{marginLeft: "10em", marginTop: "10em", marginBottom: "10em"}}>
+    <div className = "col-md-6">
+      <form onSubmit={handleSubmit} style={{marginLeft: "10em", marginTop: "10em", marginBottom: "10em", float: "left"}}>
         <h2>Already a member?</h2>
         <p>Please login...</p>
         <label htmlFor="login_email"><b>Email:</b></label>
@@ -53,6 +54,18 @@ function Login(){
         <br/>
         <button type="submit" className="login">Login</button>
       </form>
+    </div>
+    <div className="col-md-6" style={{float: "right"}}>
+      <div style={{marginTop: "15em", textAlign: "center"}}>
+      <h2>New to SmartSchedule?</h2>
+      <br/>
+      <Link to="/register">
+      <button>
+      Click here to Register
+      </button>
+      </Link>
+    </div>
+    </div>
     </div>
   );
 }

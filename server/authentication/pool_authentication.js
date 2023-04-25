@@ -13,7 +13,6 @@ const authentication = async(req, res, next) => {
           message: error
         });
       }
-      console.log(result[0].is_admin);
     });
     return next();
   }

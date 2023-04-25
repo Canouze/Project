@@ -17,6 +17,7 @@ router.get('/check-auth', check_authentication, (req, res, next) => {
 
 })
 
+
 router.route('/register').post((req, res) => {
   let {userEmail, userPassword, userPassword2, userFname, userLname, isAdmin, teamKey, teamName} = req.body;
   const user = {user_email: userEmail, user_fname: userFname, user_lname: userLname, is_admin: isAdmin};
@@ -135,7 +136,6 @@ router.route('/register').post((req, res) => {
 });
 
 router.get('/view-projects', (req, res, next) => {
-  const check = internal_authentication;
   dbs.query("SELECT * FROM projects", (error, result) => {
     if(error){
       return res.status(400).send({
@@ -172,6 +172,29 @@ router.get('/create-schedule', standard_authentication, (req, res, next) => {
   })
 })
 
+router.post('/remove-schedule', standard_authentication, (req, res, next) => {
+  let {employeeID, scheduleDate} = req.body;
+  const proj = {user_id: employeeID, dt: scheduleDate};
+  console.log(proj.user_id)
+  console.log(proj.user_id+proj.dt);
+  try{
+    dbs.query("DELETE FROM schedule_event WHERE user_id = ? AND dt = ?;", [proj.user_id, proj.dt], (error, result) =>{
+      if(error){
+        return res.status(400).send({
+          message: error
+        })
+      }
+      console.log(result);
+      return res.status(201).send({ message: "Schedule Event has been Removed"})
+    })
+  }
+  catch{
+    return res.status(500).send({
+      message: "Server Error"
+    });
+  }
+})
+
 router.route('/create-schedule2', standard_authentication).post((req, res, next) => {
   let {employeeID, scheduleDate, projectID} = req.body;
   const sced = {user_id: employeeID, dt: scheduleDate, project_id: projectID};
@@ -182,7 +205,7 @@ router.route('/create-schedule2', standard_authentication).post((req, res, next)
           message: error
         });
       }
-      //return res.status(201).send({ message: "Schedule Event Created Successfuly"})
+      return res.status(201).send({ message: "Schedule Event Created Successfuly"})
     })
     dbs.query("SELECT * from projects", (error, result) => {
       if(error){
@@ -190,7 +213,7 @@ router.route('/create-schedule2', standard_authentication).post((req, res, next)
           message: error
         });
       }
-      return res.status(200).send({ data: result });
+      //return res.status(200).send({ data: result });
     })
   }
   catch(error){
@@ -218,7 +241,7 @@ router.get('/schedule', pool_authentication, (req, res, next) => {
 
   queryPromise1 = () => {
     return new Promise((resolve, reject) => {
-      dbp.query("SELECT w, y FROM calendar_table WHERE dt = ?", currDate, (error, result) => {
+      dbs.query("SELECT w, y FROM calendar_table WHERE dt = ?", currDate, (error, result) => {
         if(error){
           return reject(error);
         }
@@ -234,7 +257,7 @@ router.get('/schedule', pool_authentication, (req, res, next) => {
   }
   queryPromise2 = () => {
     return new Promise((resolve, reject) => {
-      dbp.query("SELECT * from calendar_table WHERE y = ? AND w = ?", [useYear, picker], (error, result) => {
+      dbs.query("SELECT * from calendar_table WHERE y = ? AND w = ?", [useYear, picker], (error, result) => {
         if(error){
           return reject(error);
         }
@@ -265,7 +288,7 @@ router.get('/schedule', pool_authentication, (req, res, next) => {
   }
   queryPromise3 = () => {
     return new Promise((resolve, reject) => {
-      dbp.query("SELECT * from users WHERE is_admin = 0", (error, result) => {
+      dbs.query("SELECT * from users WHERE is_admin = 0", (error, result) => {
         if(error){
           return reject(error);
         }
@@ -276,6 +299,7 @@ router.get('/schedule', pool_authentication, (req, res, next) => {
       })
     })
   }
+
   queryPromise4 = () => {
     let counter = 0;
     return new Promise((resolve, reject) => {
@@ -283,7 +307,7 @@ router.get('/schedule', pool_authentication, (req, res, next) => {
         employeeHold[i].goer.push(employeeHold[i].firstName+" "+employeeHold[i].lastName);
         employeeHold[i].goer.push(employeeHold[i].id);
         for(let j=0; j<datesHold.length; j++){
-          dbp.query("SELECT project_name from schedule_event INNER JOIN projects ON schedule_event.project_id = projects.project_id AND user_id = ? AND dt = ?", [employeeHold[i].id, datesHold[j]], (error, result) => {
+          dbs.query("SELECT project_name from schedule_event INNER JOIN projects ON schedule_event.project_id = projects.project_id AND user_id = ? AND dt = ?", [employeeHold[i].id, datesHold[j]], (error, result) => {
             if(error){
               return reject(error);
             }
@@ -302,6 +326,7 @@ router.get('/schedule', pool_authentication, (req, res, next) => {
       }
     })
   }
+
   queryPromise5 = () => {
     return new Promise((resolve, reject) => {
       let tempArray = [];
@@ -349,8 +374,8 @@ router.get('/schedule', pool_authentication, (req, res, next) => {
 });
 
 router.post('/create-project', standard_authentication, (req, res, next) => {
-  let {projectName, projectLocation, contactName, contactNumber, projectDeadline} = req.body;
-  const proj = {project_name: projectName, project_location: projectLocation, contact_name: contactName, contact_number: contactNumber, project_deadline: projectDeadline};
+  let {projectName, clientName, projectLocation, contactName, contactNumber, projectDeadline} = req.body;
+  const proj = {project_name: projectName, client_name: clientName, project_location: projectLocation, contact_name: contactName, contact_number: contactNumber, project_deadline: projectDeadline};
   try{
     dbs.query("INSERT INTO projects SET ?", proj, (error, result) => {
       if(error){

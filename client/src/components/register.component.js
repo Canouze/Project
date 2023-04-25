@@ -95,7 +95,7 @@ function Register(){
   return(
     <div className = "wrapper">
       <form onSubmit={handleSubmit} style={{marginLeft: "5em", marginTop: "2em", marginBottom: "10em", display: "flex"}}>
-        <div class="col-md-6" style={{marginTop: "5em"}}>
+        <div class="col-md-6" style={{marginTop: "3em"}}>
           <h2>Register</h2>
           <p>We need some details...</p>
           <label htmlFor="register_email"><b>Email:</b></label>
@@ -124,7 +124,7 @@ function Register(){
           <br/>
           <br/>
         </div>
-        <div class="col-md-6" style={{marginTop: "8em", paddingRight: "10em"}}>
+        <div class="col-md-6" style={{marginTop: "5em", paddingRight: "10em"}}>
           <p>Do you want to join an existing team or register as an admin and create a new team?</p>
           <br/>
           <label htmlFor="notAdmin"><b>Standard User - Join an Existing Team</b></label>

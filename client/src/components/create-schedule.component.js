@@ -7,7 +7,7 @@ import withRouter from './withRouter.component'
 class CreateSchedule extends Component{
   constructor(props){
     super(props)
-    this.state = {projectID: '', employeeName: '', employeeID: '', scheduleDate: '', showProjects: {data: [] } };
+    this.state = {info: '', projectID: '', employeeName: '', employeeID: '', scheduleDate: '', showProjects: {data: [] } };
     this.handleChange = this.handleChange.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
   }
@@ -24,6 +24,24 @@ class CreateSchedule extends Component{
   handleChange(change){
     this.setState({projectID: change.target.value});
   }
+  additionalContent(info){
+    if(info===""){
+      return(
+        <br></br>
+      )
+    }
+    else{
+      return(
+        <div style={{paddingTop: "12em", textAlign: "centre"}}>
+          <h4>{this.state.info}</h4>
+          <br></br>
+          <Link to='/schedule'>
+          <button>Return to Schedule</button>
+          </Link>
+        </div>
+      )
+    }
+  }
   onSubmit(change){
     change.preventDefault();
     const scedObj = {
@@ -32,10 +50,11 @@ class CreateSchedule extends Component{
       scheduleDate: this.state.scheduleDate
     }
     console.log(scedObj);
-    axios.post('/create-schedule2', scedObj)
+    axios.post('/create-schedule2', scedObj, { headers: {"Authorisation" : `Bearer ${Cookies.get('token')}`} })
       .then((res) => {
-        console.log(res.data);
-        this.setState({showProjects: res.data });
+        console.log(res.data.message)
+        this.setState({info: res.data.message});
+        console.log(this.state.info);
       }).catch((error) => {
         console.log(error)
       })
@@ -43,7 +62,7 @@ class CreateSchedule extends Component{
   render(){
     return(
       <div className = "wrapper">
-        <div class="col-md-12">
+        <div class="col-md-4" style={{float: "left", paddingTop: "5em"}}>
           <br></br>
           <h2>Create Schedule</h2>
           <br></br>
@@ -65,7 +84,10 @@ class CreateSchedule extends Component{
             <br></br>
             <button type="submit">Create Schedule</button>
           </form>
-        </div>
+          </div>
+          <div class="col-md-8" style={{display: "inline-block", textAlign: "center"}}>
+            {this.additionalContent(this.state.info)}
+          </div>
       </div>
     )
   }

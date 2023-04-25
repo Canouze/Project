@@ -20,6 +20,7 @@ import ViewProjects from './components/view-projects.component'
 import AdminDashboard from './components/admin-dashboard.component'
 import UserDashboard from './components/user-dashboard.component'
 import Logout from './components/logout.component'
+import RemoveSchedule from './components/remove-schedule.component'
 
 const createError = require('http-errors');
 function App() {
@@ -47,6 +48,22 @@ function App() {
       )
     }
   }
+  const dashboardVersion = e =>{
+    if(userObj.isAdmin===0){
+      return(
+        <Nav.Item>
+          <Nav.Link as={Link} to="/user-dashboard">Dashboard</Nav.Link>
+        </Nav.Item>
+      )
+    }
+    else if(userObj.isAdmin===1){
+      return(
+        <Nav.Item>
+          <Nav.Link as={Link} to="admin-dashboard">Dashboard</Nav.Link>
+        </Nav.Item>
+      )
+    }
+  }
   return (
     <Router>
       <div className="App">
@@ -61,17 +78,15 @@ function App() {
               <Navbar.Brand as={Link} to="/">
                 SmartSchedule
               </Navbar.Brand>
+              {dashboardVersion()}
               <Nav.Item className="ms-auto">
-                <Nav.Link as={Link} to="/user-list" style={{height: "auto", marginLeft: "2em"}}>{userObj.userName}</Nav.Link>
+                <Nav.Link style={{height: "auto", marginLeft: "2em"}}>{userObj.userName}</Nav.Link>
               </Nav.Item>
               <Nav.Item>
                 <img src="user_icon.png" width="40" style={{height: "auto"}} alt="Main Icon"/>
               </Nav.Item>
               <Nav.Item>
                 <NavDropdown align="end">
-                  <NavDropdown.Item>
-                    <Link style={{color: "black", fontWeight: "bold"}} className="nav-link" to={'/dashboard'}>Dashboard</Link>
-                  </NavDropdown.Item>
                   <NavDropdown.Item>
                     {handleMenu()}
                   </NavDropdown.Item>
@@ -95,6 +110,7 @@ function App() {
                 <Route path="/admin-dashboard" element={<AdminDashboard />} />
                 <Route path="view-projects" element={<ViewProjects />} />
                 <Route path="/logout" element={<Logout />} />
+                <Route path="/remove-schedule" element={<RemoveSchedule />} />
               </Routes>
             </div>
           </div>
