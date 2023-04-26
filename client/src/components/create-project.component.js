@@ -13,7 +13,7 @@ export default class CreateProject extends Component {
     this.onChangeContactNumber = this.onChangeContactNumber.bind(this);
     this.onChangeProjectDeadline = this.onChangeProjectDeadline.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
-    this.state = {info: '', projectName: '', projectLocation: '', contactName: '', contactNumber: '', projectDeadline: ''};
+    this.state = {info: '', projectName: '', clientName: '', projectLocation: '', contactName: '', contactNumber: '', projectDeadline: ''};
   }
   componentDidMount(){
     axios.get("/check-auth", { headers: {"Authorisation" : `Bearer ${Cookies.get('token')}`} })
@@ -65,7 +65,7 @@ export default class CreateProject extends Component {
     const projObj = {
       projectName: this.state.projectName,
       clientName: this.state.clientName,
-      projectLocation: this.state.projectName,
+      projectLocation: this.state.projectLocation,
       contactName: this.state.contactName,
       contactNumber: this.state.contactNumber,
       projectDeadline: this.state.projectDeadline

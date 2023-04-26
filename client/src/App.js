@@ -21,6 +21,9 @@ import AdminDashboard from './components/admin-dashboard.component'
 import UserDashboard from './components/user-dashboard.component'
 import Logout from './components/logout.component'
 import RemoveSchedule from './components/remove-schedule.component'
+import ViewEmployees from './components/view-employees.component'
+import EditEmployee from './components/edit-employee.component'
+import StandardSchedule from './components/standard-schedule.component'
 
 const createError = require('http-errors');
 function App() {
@@ -49,14 +52,7 @@ function App() {
     }
   }
   const dashboardVersion = e =>{
-    if(userObj.isAdmin===0){
-      return(
-        <Nav.Item>
-          <Nav.Link as={Link} to="/user-dashboard">Dashboard</Nav.Link>
-        </Nav.Item>
-      )
-    }
-    else if(userObj.isAdmin===1){
+    if(userObj.isAdmin===1){
       return(
         <Nav.Item>
           <Nav.Link as={Link} to="admin-dashboard">Dashboard</Nav.Link>
@@ -111,6 +107,9 @@ function App() {
                 <Route path="view-projects" element={<ViewProjects />} />
                 <Route path="/logout" element={<Logout />} />
                 <Route path="/remove-schedule" element={<RemoveSchedule />} />
+                <Route path="/view-employees" element={<ViewEmployees />} />
+                <Route path="/edit-employee" element={<EditEmployee />} />
+                <Route path="/standard-schedule" element={<StandardSchedule />} />
               </Routes>
             </div>
           </div>

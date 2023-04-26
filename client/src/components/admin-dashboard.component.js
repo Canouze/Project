@@ -43,7 +43,9 @@ function AdminDashboard(){
             <h2 style={{paddingTop: "0.5em"}}>View Schedule</h2>
           </div>
           <div className="col-md-4" style={{textAlign: "center"}}>
+          <Link to='/view-employees'>
             <img src="employees_icon.png"  style={{width: "40%", height: "auto", marginLeft: "auto", marginRight: "auto"}} alt="Employee Icon"/>
+          </Link>
             <h2 style={{paddingTop: "0.5em"}}>Employees</h2>
           </div>
         </div>

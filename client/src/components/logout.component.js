@@ -9,6 +9,7 @@ function Logout(){
   let navigate = useNavigate();
   useEffect(()=>{
     Cookies.remove('token');
+    Cookies.remove('teamID');
     navigate('/login');
     window.location.reload();
   })

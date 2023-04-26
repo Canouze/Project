@@ -17,6 +17,65 @@ router.get('/check-auth', check_authentication, (req, res, next) => {
 
 })
 
+router.post('/edit-employee', standard_authentication, (req, res, next)=>{
+  let select = 0;
+  let {employeeID, employeeStartDate, employeeLevel} = req.body;
+  console.log(employeeID)
+  console.log(employeeStartDate)
+  console.log(employeeLevel)
+  if(employeeLevel!==""&&employeeStartDate!==""){
+    const user = {user_level: employeeLevel, user_startdate: employeeStartDate}
+    select = 1;
+  }
+  else if(employeeLevel!==""&&employeeStartDate===""){
+    const user = {user_level: employeeLevel}
+    select = 2;
+  }
+  else if(employeeStartDate!==""&&employeeLevel===""){
+    const user = {user_startDate: employeeStartDate}
+    select = 3;
+  }
+  else{
+    return res.status(400).send({
+      message: "Both field are empty"
+    })
+  }
+  if(select===1){
+    dbs.query("UPDATE users SET user_startdate = ?, user_level = ? WHERE user_id = ?;", [employeeStartDate, employeeLevel, employeeID], (error, result) => {
+      if(error){
+        console.log(error)
+        return res.status(400).send({
+          message: error
+        });
+      }
+      console.log(result)
+      return res.status(201).send({ message: "Updates completed successfully"})
+    })
+  }
+  else if(select===2){
+    dbs.query("UPDATE users SET user_level = ? WHERE user_id = ?;", [employeeLevel, employeeID], (error, result) => {
+      console.log(error)
+      if(error){
+        return res.status(400).send({
+          message: error
+        });
+      }
+      return res.status(201).send({ message: "Employee Level Updated"})
+    })
+  }
+  else if(select===3){
+    dbs.query("UPDATE users SET user_startdate = ? WHERE user_id = ?;", [employeeStartDate, employeeID], (error, result) => {
+      console.log(error)
+      if(error){
+        return res.status(400).send({
+          message: error
+        });
+      }
+      return res.status(201).send({ message: "Employee StartDate Updated"})
+    })
+  }
+})
+
 
 router.route('/register').post((req, res) => {
   let {userEmail, userPassword, userPassword2, userFname, userLname, isAdmin, teamKey, teamName} = req.body;
@@ -56,6 +115,7 @@ router.route('/register').post((req, res) => {
         const unique_key=uid();
         team.team_key=unique_key;
         user.team_key=unique_key;
+        user.team_name=teamName;
         queryPromise1 = () => {
           return new Promise((resolve, reject) => {
             dbp.query("INSERT INTO teams SET ?;",team, (error, result) => {
@@ -135,11 +195,35 @@ router.route('/register').post((req, res) => {
   });
 });
 
-router.get('/view-projects', (req, res, next) => {
+router.post('/view-employees', standard_authentication, (req, res, next) => {
+  let {teamKey, startDate, level} = req.body;
+  dbs.query("SELECT * from users WHERE is_admin = 0 AND team_key = ?;", teamKey, (error, result) => {
+    if(error){
+      console.log(error);
+      return res.status(400).send({
+        message: "error"
+      })
+    }
+    let totalEmployees = result.length;
+    let tempDisplay = [];
+    var currDate = new Date();
+    for(let i=0; i<result.length; i++){
+      let date2 = new Date(result[i].user_startdate);
+      let duration = (currDate.getTime()-date2.getTime())/86400000;
+      if(result[i].user_level>=level && duration>=startDate){
+        tempDisplay.push(result[i]);
+      }
+    }
+    let filteredOut = totalEmployees-tempDisplay.length;
+    res.send({displayEmployees: tempDisplay, filteredOut: filteredOut})
+  })
+})
+
+router.get('/view-projects', standard_authentication, (req, res, next) => {
   dbs.query("SELECT * FROM projects", (error, result) => {
     if(error){
       return res.status(400).send({
-        message: error
+        message: "error"
       });
     }
     let totalProjects = result.length;
@@ -226,7 +310,7 @@ router.route('/create-schedule2', standard_authentication).post((req, res, next)
 router.get('/schedule', pool_authentication, (req, res, next) => {
   var currDate = new Date().toISOString().slice(0,10);
   let weekAdder = parseInt(req.query.weekAdder);
-  let teamGet = parseInt(req.query.teamGet);
+  let teamGet = req.query.teamGet;
   function employee(id, first, last) {
     this.id = id;
     this.firstName = first;
@@ -288,7 +372,7 @@ router.get('/schedule', pool_authentication, (req, res, next) => {
   }
   queryPromise3 = () => {
     return new Promise((resolve, reject) => {
-      dbs.query("SELECT * from users WHERE is_admin = 0", (error, result) => {
+      dbs.query("SELECT * from users WHERE is_admin = 0 and team_key = ?;", teamGet, (error, result) => {
         if(error){
           return reject(error);
         }
@@ -420,7 +504,7 @@ router.route('/login').post((req, res) => {
       console.log(parseInt(result[0].is_admin));
       res.status(200).send({
         message: "Login Successful",
-        user: {userID: result[0].user_id, isAdmin: parseInt(result[0].is_admin)},
+        user: {userID: result[0].user_id, teamKey: result[0].team_key, isAdmin: parseInt(result[0].is_admin)},
         token
       })
     });

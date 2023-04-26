@@ -24,16 +24,17 @@ function Login(){
     axios.post('http://localhost:4000/users/login', userObj)
       .then((res) => {
         Cookies.set("token", res.data.token);
+        Cookies.set("teamID", res.data.user.teamKey);
         if(res.data.user.isAdmin===1){
           navigate('/admin-dashboard');
           window.location.reload();
         }
         else{
-          navigate('/user-dashboard');
+          navigate('/standard-schedule');
           window.location.reload();
         }
       }).catch((error) => {
-        console.log(error)
+        console.log(error);
       });
   }
   return (

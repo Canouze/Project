@@ -7,7 +7,7 @@ import Cookies from "js-cookie";
 import withRouter from './withRouter.component'
 const async = require('async');
 
-function Schedule(){
+function StandardSchedule(){
   let navigate = useNavigate();
   const [display, setDisplay] = useState([["", "", "", "", "", "", "", ""]]);
   const [weekAdder, setWeekAdder] = useState(0);
@@ -54,10 +54,6 @@ function Schedule(){
     await querySelector2();
   }
 
-  const handleClick2 = d => {
-    navigate('/create-schedule', {state: {employee: d[0], id: d[1], date: dates[0]}})
-  }
-
   return(
     <div className = "wrapper">
       <div class="col-md-12" style={{display: "inline-block", paddingTop: "2em"}}>
@@ -97,39 +93,25 @@ function Schedule(){
                 <tr style={{border: "1px solid"}}>
                   <td style={{backgroundColor: "#5F9EA0", color: "white"}}>{d[0]}</td>
                   <td style={ d[2]!="Available" ? { backgroundColor: "#B0C4DE"} : {}}>
-                    <Link to={d[2]==="Available" ? '/create-schedule' : '/remove-schedule'}
-                      state={{employee: d[0], id: d[1], date: dates[0]}}
-                    >{d[2]}</Link>
+                    {d[2]}
                   </td>
                   <td style={ d[3]!="Available" ? { backgroundColor: "#B0C4DE"} : {}}>
-                    <Link to={d[3]==="Available" ? '/create-schedule' : '/remove-schedule'}
-                      state={{employee: d[0], id: d[1], date: dates[1]}}
-                    >{d[3]}</Link>
+                    {d[3]}
                   </td>
                   <td style={ d[4]!="Available" ? { backgroundColor: "#B0C4DE"} : {}}>
-                    <Link to={d[4]==="Available" ? '/create-schedule' : '/remove-schedule'}
-                      state={{employee: d[0], id: d[1], date: dates[2]}}
-                    >{d[4]}</Link>
+                    {d[4]}
                   </td>
                   <td style={ d[5]!="Available" ? { backgroundColor: "#B0C4DE"} : {}}>
-                    <Link to={d[5]==="Available" ? '/create-schedule' : '/remove-schedule'}
-                      state={{employee: d[0], id: d[1], date: dates[3]}}
-                    >{d[5]}</Link>
+                    {d[5]}
                   </td>
                   <td style={ d[6]!="Available" ? { backgroundColor: "#B0C4DE"} : {}}>
-                    <Link to={d[6]==="Available" ? '/create-schedule' : '/remove-schedule'}
-                      state={{employee: d[0], id: d[1], date: dates[4]}}
-                    >{d[6]}</Link>
+                    {d[6]}
                   </td>
                   <td style={ d[7]!="Available" ? { backgroundColor: "#B0C4DE"} : {}}>
-                    <Link to={d[7]==="Available" ? '/create-schedule' : '/remove-schedule'}
-                      state={{employee: d[0], id: d[1], date: dates[5]}}
-                    >{d[7]}</Link>
+                    {d[7]}
                   </td>
                   <td style={ d[8]!="Available" ? { backgroundColor: "#B0C4DE"} : {}}>
-                    <Link to={d[8]==="Available" ? '/create-schedule' : '/remove-schedule'}
-                      state={{employee: d[0], id: d[1], date: dates[6]}}
-                    >{d[8]}</Link>
+                    {d[8]}
                   </td>
                 </tr>
               )
@@ -140,4 +122,4 @@ function Schedule(){
     </div>
   )
 }
-export default Schedule;
+export default StandardSchedule;
